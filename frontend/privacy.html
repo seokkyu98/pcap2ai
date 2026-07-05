@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개인정보처리방침 — pcap2ai</title>
+  <meta name="description" content="pcap2ai의 개인정보처리방침. 업로드 파일의 처리 방식, 쿠키와 광고, 로그 데이터에 대한 정책을 안내합니다.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://pcap2ai.vercel.app/privacy.html">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23020617'/%3E%3Cpath d='M7 22 L13 10 L17 18 L20 13 L25 22 Z' fill='%235ea8e8'/%3E%3C/svg%3E">
+
+  <!-- Google AdSense 자동 광고: 애드센스 승인 후 아래 주석을 해제하고
+       ca-pub-XXXXXXXXXXXXXXXX 를 발급받은 게시자 ID로 교체하세요.
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="/">
+        <span class="sigil">&gt;_</span>
+        <span class="name">pcap<em>2</em>ai</span>
+        <span class="tag">packet capture → LLM-ready text</span>
+      </a>
+      <nav class="site-nav" aria-label="주 메뉴">
+        <a href="/">변환 도구</a>
+        <a href="/#guide">사용 가이드</a>
+        <a href="about.html">소개</a>
+        <a href="contact.html">문의</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="article mt-14">
+      <p class="eyebrow">Privacy Policy</p>
+      <h1>개인정보처리방침</h1>
+      <p>
+        pcap2ai(이하 "서비스")는 이용자의 개인정보와 업로드 데이터를 보호하는 것을
+        최우선 원칙으로 합니다. 본 방침은 서비스가 어떤 정보를 다루고, 어떻게 처리하며,
+        무엇을 수집하지 않는지를 설명합니다.
+      </p>
+      <p><strong>시행일: 2026년 7월 5일</strong></p>
+
+      <section>
+        <h2>1. 업로드된 캡처 파일의 처리</h2>
+        <ul>
+          <li>업로드된 패킷 캡처 파일(.pcap/.pcapng/.cap)은 <strong>변환 처리 목적으로만</strong> 사용됩니다.</li>
+          <li>파일은 변환이 진행되는 동안에만 서버의 임시 저장 공간에 존재하며, 변환이 완료되거나
+            중단되는 <strong>즉시 자동 삭제</strong>됩니다.</li>
+          <li>변환 결과 텍스트는 서버에 저장되지 않고 이용자의 브라우저로만 실시간 전송됩니다.</li>
+          <li>서비스 운영자는 업로드된 파일의 내용을 열람하지 않으며, 파일 내용을 데이터베이스,
+            백업, 로그 등 어떤 형태로도 보관하지 않습니다.</li>
+          <li>파일 내용이 광고, 분석, 학습 등 제3의 목적으로 사용되는 일은 없습니다.</li>
+        </ul>
+        <p>
+          다만 패킷 캡처에는 IP 주소, 통신 내용 등 민감 정보가 포함될 수 있으므로, 사내 보안 정책이
+          적용되는 트래픽은 업로드 전에 캡처 범위를 최소화하거나 익명화 도구(예: TraceWrangler)를
+          사용할 것을 권장합니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. 수집하지 않는 정보</h2>
+        <p>서비스는 회원 가입 기능이 없으며, 다음 정보를 수집하지 않습니다.</p>
+        <ul>
+          <li>이름, 이메일 주소, 연락처 등 신원 정보</li>
+          <li>계정, 비밀번호, 프로필</li>
+          <li>업로드 파일의 사본 또는 변환 결과물</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. 자동으로 처리되는 기술 정보</h2>
+        <p>
+          서비스 인프라(호스팅 사업자)는 보안과 오류 진단을 위해 접속 IP 주소, 요청 시각,
+          브라우저 정보(User-Agent) 등이 포함된 표준 서버 로그를 일시적으로 기록할 수 있습니다.
+          이 로그는 인프라 사업자의 정책에 따라 단기간 보관 후 파기되며, 이용자를 식별하거나
+          추적하는 목적으로 사용되지 않습니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. 쿠키 및 광고</h2>
+        <p>
+          서비스는 자체적으로 추적용 쿠키를 사용하지 않습니다. 다만 서버 운영 비용 충당을 위해
+          Google AdSense 광고가 게재될 수 있으며, 이 경우 다음 사항이 적용됩니다.
+        </p>
+        <ul>
+          <li>Google을 포함한 제3자 광고 사업자는 쿠키를 사용하여 이용자의 이전 방문 기록에
+            기반한 광고를 게재할 수 있습니다.</li>
+          <li>Google의 광고 쿠키 사용에 대한 자세한 내용과 맞춤 광고 선택 해제 방법은
+            <a href="https://policies.google.com/technologies/ads?hl=ko" rel="noopener" target="_blank">Google 광고 정책 페이지</a>
+            및 <a href="https://adssettings.google.com/" rel="noopener" target="_blank">Google 광고 설정</a>에서 확인할 수 있습니다.</li>
+          <li>이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있으며, 이 경우에도 변환 기능
+            이용에는 제한이 없습니다.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. 데이터 전송 보안</h2>
+        <p>
+          이용자 브라우저와 서버 간의 모든 통신(파일 업로드 및 변환 결과 수신)은
+          HTTPS(TLS)로 암호화되어 전송됩니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. 아동의 개인정보</h2>
+        <p>
+          서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로
+          수집하지 않습니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. 방침의 변경</h2>
+        <p>
+          본 방침이 변경되는 경우 이 페이지를 통해 공지하며, 중요한 변경 사항은 시행일과 함께
+          명시합니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>8. 문의</h2>
+        <p>
+          개인정보 처리에 관한 문의는 <a href="contact.html">문의 페이지</a>를 통해
+          접수해 주시기 바랍니다.
+        </p>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="cols">
+        <span class="mono" style="color:var(--text)">pcap2ai</span>
+        <nav aria-label="푸터 메뉴">
+          <a href="about.html">서비스 소개</a>
+          <a href="privacy.html">개인정보처리방침</a>
+          <a href="contact.html">문의하기</a>
+        </nav>
+      </div>
+      <p class="fine">
+        pcap2ai는 네트워크 트러블슈팅을 위한 무료 변환 유틸리티입니다. 변환 결과를 활용한 분석·판단의
+        책임은 사용자에게 있으며, 민감한 트래픽은 업로드 전 범위를 최소화할 것을 권장합니다.<br>
+        © 2026 pcap2ai. All rights reserved.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>pcap2ai — PCAP 패킷 캡처를 AI 분석용 텍스트로 변환</title>
+  <meta name="description" content="Wireshark로 수집한 .pcap/.pcapng 패킷 캡처를 ChatGPT·Gemini가 읽을 수 있는 구조화 텍스트로 변환하는 무료 웹 도구. 방화벽 트래픽 속 IPsec 터널 다운, 세션 드랍 지점을 AI로 추적하세요. 파일은 서버에 저장되지 않습니다.">
+  <meta name="robots" content="index, follow">
+  <!-- 도메인 구입 후 실제 도메인으로 교체 -->
+  <link rel="canonical" href="https://pcap2ai.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="pcap2ai">
+  <meta property="og:title" content="pcap2ai — PCAP 패킷 캡처를 AI 분석용 텍스트로 변환">
+  <meta property="og:description" content="Wireshark 캡처를 LLM이 전수 분석할 수 있는 텍스트로. 파일 미저장 스트리밍 변환.">
+  <meta property="og:url" content="https://pcap2ai.vercel.app/">
+  <meta property="og:locale" content="ko_KR">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23020617'/%3E%3Cpath d='M7 22 L13 10 L17 18 L20 13 L25 22 Z' fill='%235ea8e8'/%3E%3C/svg%3E">
+
+  <!-- Google AdSense 자동 광고: 애드센스 승인 후 아래 주석을 해제하고
+       ca-pub-XXXXXXXXXXXXXXXX 를 발급받은 게시자 ID로 교체하세요.
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  -->
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/site.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "pcap2ai",
+    "url": "https://pcap2ai.vercel.app/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "description": "Wireshark 패킷 캡처(.pcap/.pcapng)를 ChatGPT, Gemini 등 LLM이 분석할 수 있는 구조화 텍스트로 변환하는 무료 웹 유틸리티",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+  }
+  </script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="/">
+        <span class="sigil">&gt;_</span>
+        <span class="name">pcap<em>2</em>ai</span>
+        <span class="tag">packet capture → LLM-ready text</span>
+      </a>
+      <nav class="site-nav" aria-label="주 메뉴">
+        <a href="/" aria-current="page">변환 도구</a>
+        <a href="#guide">사용 가이드</a>
+        <a href="about.html">소개</a>
+        <a href="contact.html">문의</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <!-- ▼ Google AdSense: 상단 반응형 배너 슬롯 (승인 후 광고 단위 코드 삽입) -->
+    <div class="ad-slot ad-slot--top" id="ad-top" aria-hidden="true"></div>
+    <!-- ▲ Google AdSense: 상단 배너 슬롯 끝 -->
+
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+
+      <!-- ==================== 변환 도구 ==================== -->
+      <section aria-labelledby="tool-title">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h1 id="tool-title" class="text-[26px] font-extrabold leading-snug tracking-tight" style="color:var(--text-strong)">
+              패킷 캡처를 <span style="color:var(--accent)">AI가 읽는 텍스트</span>로
+            </h1>
+            <p class="text-[13.5px] mt-1" style="color:var(--text-dim)">
+              .pcap · .pcapng 파일을 업로드하면 LLM 전수 분석에 맞춘 .txt로 즉시 변환해 내려받습니다.
+              파일은 서버에 저장되지 않습니다.
+            </p>
+          </div>
+          <span class="chip" id="server-chip">
+            <span class="dot"></span>
+            <span id="server-chip-text">서버 확인 중…</span>
+          </span>
+        </div>
+
+        <!-- 캡처 패널: 드롭존 → 파일 → 라이브 콘솔 -->
+        <div class="pane">
+          <div class="pane-head" aria-hidden="true">
+            <span class="col-no">No.</span>
+            <span class="col-time">Time</span>
+            <span class="col-addr">Source</span>
+            <span class="col-addr">Destination</span>
+            <span class="col-proto">Proto</span>
+            <span class="col-info">Info</span>
+          </div>
+
+          <div class="dropzone" id="dropzone" role="button" tabindex="0"
+               aria-label="pcap 파일 선택 또는 드래그 앤 드롭 (최대 100MB)">
+            <div class="ghost-rows" aria-hidden="true">
+              <span class="g-tcp">1&nbsp;&nbsp;&nbsp;0.000000&nbsp;&nbsp;10.20.1.34&nbsp;&nbsp;&nbsp;&nbsp;203.0.113.8&nbsp;&nbsp;&nbsp;TCP&nbsp;&nbsp;52914 → 443 [SYN] Seq=0 Win=64240</span>
+              <span class="g-tcp">2&nbsp;&nbsp;&nbsp;0.041220&nbsp;&nbsp;203.0.113.8&nbsp;&nbsp;&nbsp;10.20.1.34&nbsp;&nbsp;&nbsp;&nbsp;TCP&nbsp;&nbsp;443 → 52914 [SYN, ACK] Seq=0 Ack=1</span>
+              <span class="g-tcp">3&nbsp;&nbsp;&nbsp;0.041395&nbsp;&nbsp;10.20.1.34&nbsp;&nbsp;&nbsp;&nbsp;203.0.113.8&nbsp;&nbsp;&nbsp;TCP&nbsp;&nbsp;52914 → 443 [ACK] Seq=1 Ack=1</span>
+              <span class="g-dns">4&nbsp;&nbsp;&nbsp;0.102831&nbsp;&nbsp;10.20.1.34&nbsp;&nbsp;&nbsp;&nbsp;10.20.0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DNS&nbsp;&nbsp;Standard query A vpn.example.com</span>
+              <span class="g-esp">5&nbsp;&nbsp;&nbsp;0.284512&nbsp;&nbsp;172.16.9.1&nbsp;&nbsp;&nbsp;&nbsp;198.51.100.4&nbsp;&nbsp;ESP&nbsp;&nbsp;SPI=0x2f01ab44 Seq=88213</span>
+              <span class="g-err">6&nbsp;&nbsp;&nbsp;0.284977&nbsp;&nbsp;198.51.100.4&nbsp;&nbsp;172.16.9.1&nbsp;&nbsp;&nbsp;&nbsp;TCP&nbsp;&nbsp;443 → 61102 [RST, ACK] Seq=412 Ack=9</span>
+              <span class="g-udp">7&nbsp;&nbsp;&nbsp;0.301246&nbsp;&nbsp;10.20.1.60&nbsp;&nbsp;&nbsp;&nbsp;10.20.0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UDP&nbsp;&nbsp;500 → 500 Len=364 (ISAKMP)</span>
+            </div>
+            <span class="dz-main">캡처 파일을 여기에 놓으세요</span>
+            <span class="dz-sub">클릭하여 선택 · <span class="dz-key">.pcap</span> <span class="dz-key">.pcapng</span> <span class="dz-key">.cap</span> · 최대 100MB</span>
+          </div>
+          <input type="file" id="file-input" accept=".pcap,.pcapng,.cap" class="hidden" aria-hidden="true">
+
+          <div class="file-row hidden" id="file-row">
+            <span class="f-icon">▸</span>
+            <span class="f-name" id="file-name"></span>
+            <span class="f-size" id="file-size"></span>
+            <button type="button" class="f-remove" id="file-remove">제거</button>
+          </div>
+
+          <div class="console hidden" id="console" aria-live="polite" aria-label="변환 진행 로그"></div>
+
+          <div class="statbar hidden" id="statbar">
+            <div class="stat"><div class="k">수신량</div><div class="v" id="stat-bytes">0 B</div></div>
+            <div class="stat"><div class="k">출력 라인</div><div class="v" id="stat-lines">0</div></div>
+            <div class="stat"><div class="k">경과 시간</div><div class="v" id="stat-time">00:00</div></div>
+            <div class="stat"><div class="k">수신 속도</div><div class="v" id="stat-speed">—</div></div>
+          </div>
+        </div>
+
+        <!-- 모드 선택 -->
+        <fieldset class="mt-5">
+          <legend class="mono text-[11px] uppercase mb-3" style="letter-spacing:0.16em;color:var(--text-dim)">변환 모드</legend>
+          <div class="mode-grid">
+            <label class="mode-card">
+              <input type="radio" name="mode" value="summary" checked>
+              <span class="body">
+                <span class="m-title">요약 모드 <span class="m-badge">대용량 권장</span></span>
+                <span class="m-desc">패킷당 한 줄 — 시간·출발지·목적지·프로토콜·TCP 플래그·Info. 전체 트래픽 흐름과 세션 단절 지점을 AI가 추적하기에 최적.</span>
+              </span>
+            </label>
+            <label class="mode-card">
+              <input type="radio" name="mode" value="detail">
+              <span class="body">
+                <span class="m-title">상세 모드 <span class="m-badge">정밀 분석</span></span>
+                <span class="m-desc">패킷마다 모든 프로토콜 계층의 전체 필드 값 + 미해석 페이로드 hex 덤프. Wireshark 상세 창의 정보를 그대로 텍스트화.</span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="notice mt-5">
+          <b>안내</b> — 무료 서버는 15분 이상 미사용 시 절전 모드로 들어가며, 첫 요청 시 깨어나는 데
+          <strong>최대 90초</strong>가 걸릴 수 있습니다. 변환 자체도 파일 크기에 따라 수 분이 소요될 수 있으니
+          진행 로그가 흐르는 동안 탭을 닫지 마세요.
+        </div>
+
+        <div class="mt-5 flex flex-col gap-3">
+          <button type="button" class="btn btn-primary" id="convert-btn" disabled>변환 시작</button>
+          <button type="button" class="btn btn-ghost hidden self-center" id="cancel-btn">변환 취소</button>
+        </div>
+      </section>
+
+      <!-- ==================== 사이드바 ==================== -->
+      <aside class="flex flex-col gap-6" aria-label="보조 정보">
+        <!-- ▼ Google AdSense: 우측 사이드바 슬롯 (승인 후 광고 단위 코드 삽입) -->
+        <div class="ad-slot ad-slot--side" id="ad-side" aria-hidden="true"></div>
+        <!-- ▲ Google AdSense: 사이드바 슬롯 끝 -->
+
+        <div class="side-card">
+          <h3>작동 방식</h3>
+          <ol>
+            <li>캡처 파일을 업로드하면 서버가 패킷을 한 개씩 스트리밍으로 해석합니다.</li>
+            <li>해석된 텍스트는 메모리에 쌓이지 않고 브라우저로 실시간 전송됩니다.</li>
+            <li>수신과 동시에 .txt 파일로 저장되고, 완료 즉시 다운로드가 끝납니다.</li>
+            <li>받은 파일을 ChatGPT·Gemini에 첨부하고 장애 구간을 질문하세요.</li>
+          </ol>
+        </div>
+
+        <div class="side-card">
+          <h3>업로드 파일 처리</h3>
+          <p>업로드된 캡처는 변환 스트림이 끝나는 즉시 <b>서버에서 삭제</b>되며, 어디에도 보관·기록되지 않습니다.
+          민감한 사내 트래픽이라면 업로드 전에 Wireshark에서 대상 구간만 잘라 올리는 것을 권장합니다.
+          자세한 내용은 <a href="privacy.html" style="color:var(--accent-strong)">개인정보처리방침</a>을 참고하세요.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ==================== 가이드 아티클 (SEO 콘텐츠) ==================== -->
+    <article class="article mt-20" id="guide">
+      <p class="eyebrow">Field Guide</p>
+      <h1>PCAP을 AI에게 읽히는 가장 현실적인 방법</h1>
+      <p>
+        pcap2ai는 네트워크 패킷 캡처 파일을 대형 언어 모델(LLM)이 전수 분석할 수 있는 구조화 텍스트로
+        바꿔 주는 징검다리 유틸리티입니다. 이 문서는 이 도구가 왜 필요한지, 어떤 원리로 동작하는지,
+        그리고 변환된 파일을 ChatGPT나 Gemini에서 어떻게 활용하면 되는지를 실무 관점에서 정리한 가이드입니다.
+      </p>
+
+      <section>
+        <h2>이 도구가 해결하는 문제</h2>
+        <p>
+          메인 방화벽이나 백본 구간에서 트래픽을 캡처하면 몇 초 만에 수십만 개의 패킷이 쌓입니다.
+          그 속에서 실제 장애의 실마리 — 특정 시각에 IPsec 터널이 내려간 순간, 잘 흐르던 TCP 세션이
+          갑자기 RST으로 끊긴 지점, 재전송이 몰리기 시작한 구간 — 는 전체의 0.1%도 되지 않는
+          미세한 흔적으로만 남습니다. 숙련된 엔지니어도 Wireshark 필터를 수십 번 바꿔 가며
+          한참을 뒤져야 찾아내는 작업입니다.
+        </p>
+        <p>
+          LLM은 이런 <strong>대량 로그 속 이상 패턴 탐지</strong>에 탁월합니다. 시간 순서로 정렬된
+          패킷 기록을 통째로 읽고 "여기서부터 응답이 사라졌다", "이 시점에 IKE 재협상이 실패했다"를
+          몇 초 만에 짚어 냅니다. 문제는 단 하나 — <strong>AI가 pcap 파일 자체를 읽지 못한다</strong>는
+          점이고, pcap2ai는 정확히 그 간극을 메웁니다.
+        </p>
+      </section>
+
+      <section>
+        <h2>왜 PCAP을 그대로 AI에 올리면 안 되는가</h2>
+        <p>
+          .pcap과 .pcapng는 libpcap 계열의 <strong>바이너리 포맷</strong>입니다. 파일 안의 각 패킷은
+          링크 계층부터 애플리케이션 계층까지 비트 단위로 인코딩된 원시 프레임이라, 텍스트를 다루도록
+          설계된 LLM에 그대로 첨부하면 다음과 같은 문제가 생깁니다.
+        </p>
+        <ul>
+          <li><strong>해석 불가</strong> — 모델은 바이너리를 토큰화하는 과정에서 프로토콜 구조를 잃어버립니다.
+            운 좋게 일부를 읽어도 필드 경계를 스스로 지어내는 환각(hallucination)이 섞입니다.</li>
+          <li><strong>토큰 낭비</strong> — 바이너리를 base64 등으로 우회 인코딩하면 원본보다 부피가 커지고,
+            의미 있는 정보 밀도는 오히려 급락합니다.</li>
+          <li><strong>도구 부재</strong> — ChatGPT의 코드 인터프리터가 파이썬으로 파싱을 시도할 수는 있지만,
+            대용량 파일에서는 실행 시간과 메모리 제한에 걸려 중간에 끊어지기 일쑤입니다.</li>
+        </ul>
+        <p>
+          반면 패킷을 <strong>한 줄 = 한 패킷</strong>의 고정 폭 텍스트로 펼쳐 놓으면 상황이 완전히
+          달라집니다. 시간·출발지·목적지·프로토콜·플래그가 열로 정렬된 텍스트는 LLM이 가장 잘 다루는
+          입력 형태이며, 수십만 줄 속에서도 시퀀스가 끊긴 지점이나 비정상 플래그 조합을 정확히 참조하며
+          답할 수 있습니다. pcap2ai가 Wireshark 패킷 리스트와 같은 컬럼 구조를 그대로 텍스트로 옮기는
+          이유가 여기에 있습니다.
+        </p>
+      </section>
+
+      <!-- ▼ Google AdSense: 본문 중간 슬롯 (승인 후 광고 단위 코드 삽입) -->
+      <div class="ad-slot ad-slot--article" id="ad-article" aria-hidden="true"></div>
+      <!-- ▲ Google AdSense: 본문 중간 슬롯 끝 -->
+
+      <section>
+        <h2>요약 모드와 상세 모드, 언제 무엇을 쓰나</h2>
+        <p>
+          LLM에는 컨텍스트(한 번에 읽을 수 있는 분량) 한계가 있습니다. Gemini가 가장 넉넉하지만
+          그래도 텍스트 수 MB 수준이고, 100MB 캡처를 전 필드로 풀면 수백 MB가 되어 어떤 모델에도
+          한 번에 들어가지 않습니다. 그래서 pcap2ai는 두 개의 모드를 제공합니다.
+        </p>
+        <ol>
+          <li><strong>요약 모드</strong> — 패킷당 한 줄. Wireshark 패킷 리스트의 No / Time / Source /
+            Destination / Protocol / Length / Info 컬럼을 고정 폭으로 정렬합니다. TCP는 플래그와
+            Seq/Ack/Win까지 포함하므로 세션 수립·단절·재전송 흐름 추적에는 이것만으로 충분합니다.
+            먼저 요약 모드로 전체를 훑어 <em>의심 구간을 특정</em>하는 것이 정석입니다.</li>
+          <li><strong>상세 모드</strong> — 패킷마다 모든 프로토콜 계층의 전체 필드 값과 미해석 페이로드의
+            hex 덤프까지 기록합니다. Wireshark 상세 창(패킷 디테일 패널)에 보이는 정보가 그대로
+            텍스트가 된다고 보면 됩니다. 요약 모드로 찾아낸 의심 구간을 Wireshark에서 잘라내
+            (<code>File → Export Specified Packets</code>) 작은 파일로 만든 뒤 상세 모드로 변환하면,
+            AI가 헤더 필드 하나하나를 근거로 원인을 설명해 줍니다.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>AI에게 질문하는 법 — 프롬프트 실전 팁</h2>
+        <p>
+          변환된 .txt를 ChatGPT나 Gemini에 첨부한 뒤에는 <strong>구체적인 관측 사실 + 원하는 출력 형식</strong>을
+          함께 주는 것이 요령입니다. 실무에서 바로 쓸 수 있는 예시 세 가지를 소개합니다.
+        </p>
+
+        <h3>세션 단절 지점 추적</h3>
+        <div class="prompt-block">첨부한 파일은 방화벽에서 캡처한 패킷 기록이다. 14:02~14:05 사이에
+10.20.1.34 ↔ 203.0.113.8 구간의 세션이 끊겼다.
+이 시간대에서 TCP 플래그 흐름(SYN/ACK/FIN/RST)을 추적해서
+어느 쪽이 먼저 연결을 끊었는지, 재전송이나 Zero Window 징후가
+있었는지 패킷 번호를 근거로 설명해 줘.</div>
+
+        <h3>IPsec 터널 다운 분석</h3>
+        <div class="prompt-block">이 캡처에는 IPsec(ESP, ISAKMP/IKE) 트래픽이 포함되어 있다.
+ESP SPI 값이 바뀌거나 시퀀스가 중단되는 지점, IKE 재협상 시도와
+그 성패를 시간순으로 정리해 줘. 터널이 내려간 것으로 추정되는
+패킷 번호와 그 직전 5개 패킷의 특이점을 표로 보여 줘.</div>
+
+        <h3>전체 트래픽 이상 징후 스캔</h3>
+        <div class="prompt-block">이 패킷 기록 전체에서 비정상 패턴을 찾아 줘. 기준:
+(1) RST가 몰리는 구간 (2) 동일 Seq 재전송 반복 (3) 응답 없는 SYN
+(4) ICMP unreachable. 각 항목별로 발생 시각, 관련 IP 쌍,
+패킷 번호 범위를 목록으로 정리하고 가장 의심되는 원인을 제시해 줘.</div>
+
+        <p>
+          파일이 모델의 첨부 한도보다 크다면 텍스트 에디터로 시간대별로 나누거나, 처음부터 Wireshark에서
+          시간 필터(<code>frame.time &gt;= "..."</code>)로 구간을 좁혀 캡처를 줄인 뒤 변환하는 편이
+          훨씬 정확한 답을 얻습니다. AI에게는 "패킷 번호를 근거로 제시하라"고 요구하세요 — 답변의
+          검증 가능성이 완전히 달라집니다.
+        </p>
+      </section>
+
+      <section class="faq">
+        <h2>자주 묻는 질문</h2>
+        <details>
+          <summary>업로드한 캡처 파일은 서버에 남나요?</summary>
+          <div class="a">아니요. 파일은 변환 스트림이 진행되는 동안만 임시 영역에 존재하며, 변환이 끝나거나
+          중단되는 즉시 삭제됩니다. 변환 결과도 서버에 저장되지 않고 브라우저로만 전송됩니다.
+          상세 내용은 <a href="privacy.html">개인정보처리방침</a>에 명시되어 있습니다.</div>
+        </details>
+        <details>
+          <summary>왜 최대 100MB인가요?</summary>
+          <div class="a">이 서비스는 무료 인프라(512MB RAM)에서 운영됩니다. 스트리밍 구조 덕분에 메모리는
+          충분하지만 CPU 자원이 제한적이라, 100MB를 초과하면 변환 시간이 비현실적으로 길어집니다.
+          더 큰 캡처는 Wireshark의 <code>editcap -c</code>로 분할해서 올려 주세요.</div>
+        </details>
+        <details>
+          <summary>변환이 오래 걸리는 것 같아요.</summary>
+          <div class="a">두 가지 이유가 있습니다. 첫째, 무료 서버는 15분 이상 요청이 없으면 절전 상태가 되어
+          첫 요청 시 깨어나는 데 최대 90초가 걸립니다. 둘째, 변환 자체가 패킷 수에 비례해 수 분이 걸릴 수
+          있습니다. 진행 로그의 수신량이 계속 늘고 있다면 정상 동작 중입니다.</div>
+        </details>
+        <details>
+          <summary>변환된 텍스트를 사람이 직접 읽어야 하나요?</summary>
+          <div class="a">그럴 필요 없습니다. 출력 포맷은 사람의 가독성이 아니라 LLM의 해석 정확도에 맞춰
+          설계되었습니다. 파일 상단에 AI를 위한 포맷 설명(컬럼 정의, 플래그 표기)이 포함되어 있어서
+          그대로 첨부만 하면 됩니다.</div>
+        </details>
+        <details>
+          <summary>어떤 프로토콜까지 해석되나요?</summary>
+          <div class="a">Ethernet, VLAN(802.1Q), ARP, IPv4/IPv6, TCP, UDP, ICMP/ICMPv6, DNS, HTTP,
+          TLS 핸드셰이크, 그리고 IPsec 계열(ESP, AH, ISAKMP/IKE)을 해석합니다. 해석기가 없는
+          프로토콜의 페이로드는 상세 모드에서 hex 덤프로 보존되므로 정보가 유실되지 않습니다.</div>
+        </details>
+      </section>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="cols">
+        <span class="mono" style="color:var(--text)">pcap2ai</span>
+        <nav aria-label="푸터 메뉴">
+          <a href="about.html">서비스 소개</a>
+          <a href="privacy.html">개인정보처리방침</a>
+          <a href="contact.html">문의하기</a>
+        </nav>
+      </div>
+      <p class="fine">
+        pcap2ai는 네트워크 트러블슈팅을 위한 무료 변환 유틸리티입니다. 변환 결과를 활용한 분석·판단의
+        책임은 사용자에게 있으며, 민감한 트래픽은 업로드 전 범위를 최소화할 것을 권장합니다.<br>
+        © 2026 pcap2ai. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- 경고 모달 -->
+  <div class="modal-backdrop hidden" id="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="m-title"><span class="m-ico">[!]</span><span id="modal-title"></span></div>
+      <div class="m-body" id="modal-body"></div>
+      <div class="m-actions"><button type="button" class="m-ok" id="modal-ok">확인</button></div>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
