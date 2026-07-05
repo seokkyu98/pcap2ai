@@ -68,7 +68,7 @@
     <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
 
       <!-- ==================== 변환 도구 ==================== -->
-      <section aria-labelledby="tool-title">
+      <section aria-labelledby="tool-title" class="min-w-0">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h1 id="tool-title" class="text-[26px] font-extrabold leading-snug tracking-tight" style="color:var(--text-strong)">
@@ -107,8 +107,10 @@
               <span class="g-err">6&nbsp;&nbsp;&nbsp;0.284977&nbsp;&nbsp;198.51.100.4&nbsp;&nbsp;172.16.9.1&nbsp;&nbsp;&nbsp;&nbsp;TCP&nbsp;&nbsp;443 → 61102 [RST, ACK] Seq=412 Ack=9</span>
               <span class="g-udp">7&nbsp;&nbsp;&nbsp;0.301246&nbsp;&nbsp;10.20.1.60&nbsp;&nbsp;&nbsp;&nbsp;10.20.0.2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;UDP&nbsp;&nbsp;500 → 500 Len=364 (ISAKMP)</span>
             </div>
-            <span class="dz-main">캡처 파일을 여기에 놓으세요</span>
-            <span class="dz-sub">클릭하여 선택 · <span class="dz-key">.pcap</span> <span class="dz-key">.pcapng</span> <span class="dz-key">.cap</span> · 최대 100MB</span>
+            <span class="dz-label">
+              <span class="dz-main">캡처 파일을 여기에 놓으세요</span>
+              <span class="dz-sub">클릭하여 선택 · <span class="dz-key">.pcap</span> <span class="dz-key">.pcapng</span> <span class="dz-key">.cap</span> · 최대 100MB</span>
+            </span>
           </div>
           <input type="file" id="file-input" accept=".pcap,.pcapng,.cap" class="hidden" aria-hidden="true">
 
@@ -163,7 +165,7 @@
       </section>
 
       <!-- ==================== 사이드바 ==================== -->
-      <aside class="flex flex-col gap-6" aria-label="보조 정보">
+      <aside class="flex flex-col gap-6 min-w-0" aria-label="보조 정보">
         <!-- ▼ Google AdSense: 우측 사이드바 슬롯 (승인 후 광고 단위 코드 삽입) -->
         <div class="ad-slot ad-slot--side" id="ad-side" aria-hidden="true"></div>
         <!-- ▲ Google AdSense: 사이드바 슬롯 끝 -->
