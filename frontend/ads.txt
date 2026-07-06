@@ -1,2 +1,2 @@
-# AdSense 승인 후 pub-XXXXXXXXXXXXXXXX 를 실제 게시자 ID로 교체하세요.
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+# pcap2ai Google AdSense 게시자 인증
+google.com, pub-5914309128739751, DIRECT, f08c47fec0942fa0
