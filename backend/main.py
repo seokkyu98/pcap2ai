@@ -120,14 +120,18 @@ app = FastAPI(
     redoc_url=None,
 )
 
-# CORS: local development + every Vercel deployment (production and previews).
-# When a custom domain is attached later, add it via the FRONTEND_ORIGINS env
-# var on Render (comma-separated), e.g. "https://pcap2ai.com,https://www.pcap2ai.com".
+# CORS: local development + production domain + every Vercel deployment
+# (preview URLs included, useful while testing). Extra origins (e.g. a staging
+# domain) can be added via the FRONTEND_ORIGINS env var on Render, comma-separated.
 _extra_origins = [o.strip() for o in os.environ.get("FRONTEND_ORIGINS", "").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_extra_origins,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://[a-z0-9-]+(\.[a-z0-9-]+)*\.vercel\.app$",
+    allow_origin_regex=(
+        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+        r"|^https://([a-z0-9-]+\.)*vercel\.app$"
+        r"|^https://(www\.)?pcap2ai\.com$"
+    ),
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
     expose_headers=["Content-Disposition"],

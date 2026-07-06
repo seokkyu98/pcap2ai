@@ -14,6 +14,8 @@ services:
         value: 3.12.4
       - key: MAX_UPLOAD_BYTES
         value: "104857600"
-      # 커스텀 도메인 연결 후 아래 주석을 해제하고 실제 도메인을 입력하세요.
+      # pcap2ai.com / www.pcap2ai.com은 backend/main.py의 CORS 정규식에 이미
+      # 하드코딩되어 있어 기본값만으로 동작합니다. 스테이징 도메인 등 추가로
+      # 허용할 출처가 생기면 아래 주석을 해제하고 콤마로 구분해 입력하세요.
       # - key: FRONTEND_ORIGINS
-      #   value: https://your-domain.com,https://www.your-domain.com
+      #   value: https://staging.pcap2ai.com

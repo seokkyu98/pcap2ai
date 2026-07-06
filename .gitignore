@@ -14,6 +14,8 @@ Thumbs.db
 *.pcapng
 *.txt
 !requirements.txt
+!frontend/ads.txt
+!frontend/robots.txt
 
 # Claude Code 로컬 설정
 .claude/

@@ -3,9 +3,10 @@
 Wireshark 패킷 캡처(.pcap/.pcapng)를 ChatGPT·Gemini 등 LLM이 분석할 수 있는
 구조화 텍스트로 변환하는 웹 유틸리티.
 
-- **frontend/** — 정적 사이트 (Vercel 배포)
+- **frontend/** — 정적 사이트 (Vercel 배포), `ads.txt`/`robots.txt`/`sitemap.xml` 포함
 - **backend/** — FastAPI 스트리밍 변환 API (Render 배포)
 - **render.yaml** — Render Blueprint (백엔드 자동 구성)
+- 도메인: **pcap2ai.com** (Cloudflare 구입, DNS only로 Vercel에 연결 — 4번 참고)
 
 ## 아키텍처
 
@@ -60,18 +61,51 @@ python -m http.server 3000
 
 백엔드 CORS는 `*.vercel.app` 전체를 이미 허용하므로 추가 설정 불필요.
 
-### 4) 커스텀 도메인 (Cloudflare 구입 후)
+### 4) 커스텀 도메인 연결 (pcap2ai.com, Cloudflare에서 구입)
 
-1. Vercel 프로젝트 → Settings → Domains → 도메인 추가 → 안내대로 Cloudflare DNS에
-   CNAME/A 레코드 등록 (Cloudflare 프록시는 **DNS only** 권장)
-2. Render 대시보드 → 환경 변수 `FRONTEND_ORIGINS`에
-   `https://도메인,https://www.도메인` 추가 후 재배포
-3. frontend 각 HTML의 `canonical` / `og:url`을 실제 도메인으로 교체
+도메인 코드 반영(canonical/og:url/JSON-LD/ads.txt/robots.txt/sitemap.xml, CORS 허용 목록)은
+이미 완료되어 있습니다. 실제로 연결하려면:
 
-### 5) Google AdSense
+1. **Vercel** → 프로젝트 → Settings → Domains → `pcap2ai.com`과 `www.pcap2ai.com` 둘 다 추가
+2. Vercel이 안내하는 레코드를 **Cloudflare DNS**에 등록
+   - 보통 `pcap2ai.com`은 A 레코드(Vercel이 주는 IP), `www`는 CNAME(`cname.vercel-dns.com`)
+   - **프록시 상태는 "DNS only"(회색 구름)로 두세요.** Cloudflare로 프록시(주황 구름)하면
+     Vercel의 자동 SSL 발급/검증과 충돌할 수 있습니다. (5번의 Cloudflare Web Analytics는
+     프록시 여부와 무관하게 동작하므로 이 설정으로도 트래픽 통계는 정상 수집됩니다.)
+3. Vercel에서 도메인이 "Valid Configuration"으로 표시되고 HTTPS 인증서가 발급될 때까지 대기
+   (보통 몇 분~1시간)
+4. Render 대시보드 → 백엔드 서비스는 별도 조치 불필요 — `backend/main.py`의 CORS 허용
+   목록에 `https://pcap2ai.com`과 `https://www.pcap2ai.com`이 이미 하드코딩되어 있습니다.
+5. 정상 연결 확인 후 `https://pcap2ai.com`으로 접속해 변환 기능이 실제로 동작하는지 테스트
 
-1. **커스텀 도메인 연결 후에만 신청 가능** (`*.vercel.app`은 등록 불가)
-2. https://adsense.google.com → 사이트 추가 → 도메인 입력
-3. 발급받은 `ca-pub-XXXX` ID로 각 HTML `<head>`의 주석 처리된 AdSense 스크립트를 해제·교체
-4. 루트에 `ads.txt` 생성: `google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0`
-5. 승인 후 자동 광고 사용 또는 `#ad-top`, `#ad-side`, `#ad-article` 슬롯에 광고 단위 코드 삽입
+### 5) Cloudflare Web Analytics (트래픽·방문자 수 확인)
+
+Cloudflare Analytics에는 두 종류가 있습니다.
+
+- **Cloudflare 프록시 트래픽 분석** — DNS를 주황 구름(프록시)으로 켜야 확인 가능한데,
+  위 4번에서 설명한 이유로 Vercel과 궁합이 좋지 않아 이번 배포에는 권장하지 않습니다.
+- **Cloudflare Web Analytics (Beacon)** — 자바스크립트 스니펫 하나만 페이지에 넣으면
+  DNS 프록시 여부와 무관하게 동작하는 무료 방문자 분석 도구입니다. 쿠키를 사용하지 않아
+  개인정보처리방침에 미치는 영향도 적습니다. **이번 프로젝트는 이 방식을 이미 코드에 반영**해
+  두었습니다 (4개 HTML 파일 모두).
+
+적용 방법:
+
+1. Cloudflare 대시보드 → **Analytics & Logs → Web Analytics** → **Add a site**
+2. 사이트 호스트네임에 `pcap2ai.com` 입력 (자동 설치 여부를 묻는 화면에서 "수동으로 설치" 선택 — 이미 코드에 스니펫이 있으므로 자동 삽입은 불필요)
+3. 발급되는 `token` 값을 복사
+4. 이 리포지토리의 `frontend/index.html`, `about.html`, `privacy.html`, `contact.html` 4개 파일에서
+   `CF_BEACON_TOKEN_PLACEHOLDER` 문자열을 모두 그 token 값으로 교체 후 push
+5. Cloudflare 대시보드의 Web Analytics 화면에서 실시간 방문자/트래픽 그래프 확인 가능
+
+### 6) Google AdSense (자동 광고)
+
+1. **커스텀 도메인 연결 후에만 신청 가능** (`*.vercel.app`은 등록 불가) — 4번을 먼저 완료하세요.
+2. https://adsense.google.com → 사이트 추가 → `pcap2ai.com` 입력 후 계정 생성
+   → 가입 즉시 `ca-pub-XXXXXXXXXXXXXXXX` 형태의 게시자 ID가 발급됩니다 (심사 승인 전에도 확인 가능)
+3. 이 리포지토리의 4개 HTML 파일에서 `ca-pub-XXXXXXXXXXXXXXXX`를 실제 게시자 ID로 모두 교체
+4. `frontend/ads.txt`의 `pub-XXXXXXXXXXXXXXXX`도 같은 값으로 교체 (형식: `pub-` 접두어 포함)
+5. push 후 Vercel 재배포 → AdSense 심사 신청 (사이트에 스크립트가 이미 심어져 있어야 심사가 진행됩니다)
+6. 승인 후 AdSense 대시보드에서 **자동 광고(Auto ads)를 On**으로 켜면 별도 코드 수정 없이
+   Google이 페이지 내 적절한 위치에 자동으로 광고를 배치합니다. (이 버전 UI에는 수동 광고
+   슬롯을 두지 않았습니다 — 자동 광고 방식과 맞지 않아 제거했습니다.)

@@ -98,28 +98,6 @@ body {
 .site-nav a[aria-current="page"] { color: var(--accent-strong); }
 
 /* --------------------------------------------------------------------------
-   광고 슬롯 — 애드센스 승인 후 실제 광고 코드가 이 컨테이너 안에 들어감
-   -------------------------------------------------------------------------- */
-.ad-slot {
-  border: 1px dashed var(--line);
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.35);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-dim);
-  position: relative;
-  overflow: hidden;
-}
-.ad-slot::before {
-  content: "advertisement";
-  font-family: var(--font-mono);
-  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
-  opacity: 0.45;
-}
-.ad-slot--top { min-height: 96px; margin: 20px 0 26px; }
-.ad-slot--side { min-height: 340px; }
-.ad-slot--article { min-height: 110px; margin: 34px 0; }
-
-/* --------------------------------------------------------------------------
    캡처 패널 (시그니처 컴포넌트) — 상태에 따라
    드롭존 → 선택된 파일 → 라이브 변환 콘솔로 변신한다.
    -------------------------------------------------------------------------- */

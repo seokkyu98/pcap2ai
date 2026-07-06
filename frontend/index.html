@@ -6,20 +6,24 @@
   <title>pcap2ai — PCAP 패킷 캡처를 AI 분석용 텍스트로 변환</title>
   <meta name="description" content="Wireshark로 수집한 .pcap/.pcapng 패킷 캡처를 ChatGPT·Gemini가 읽을 수 있는 구조화 텍스트로 변환하는 무료 웹 도구. 방화벽 트래픽 속 IPsec 터널 다운, 세션 드랍 지점을 AI로 추적하세요. 파일은 서버에 저장되지 않습니다.">
   <meta name="robots" content="index, follow">
-  <!-- 도메인 구입 후 실제 도메인으로 교체 -->
-  <link rel="canonical" href="https://pcap2ai.vercel.app/">
+  <link rel="canonical" href="https://pcap2ai.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="pcap2ai">
   <meta property="og:title" content="pcap2ai — PCAP 패킷 캡처를 AI 분석용 텍스트로 변환">
   <meta property="og:description" content="Wireshark 캡처를 LLM이 전수 분석할 수 있는 텍스트로. 파일 미저장 스트리밍 변환.">
-  <meta property="og:url" content="https://pcap2ai.vercel.app/">
+  <meta property="og:url" content="https://pcap2ai.com/">
   <meta property="og:locale" content="ko_KR">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23020617'/%3E%3Cpath d='M7 22 L13 10 L17 18 L20 13 L25 22 Z' fill='%235ea8e8'/%3E%3C/svg%3E">
 
-  <!-- Google AdSense 자동 광고: 애드센스 승인 후 아래 주석을 해제하고
-       ca-pub-XXXXXXXXXXXXXXXX 를 발급받은 게시자 ID로 교체하세요.
+  <!-- Cloudflare Web Analytics: Cloudflare 대시보드 → Analytics & Logs → Web Analytics
+       → Add a site → pcap2ai.com 등록 후 발급되는 token 값으로 아래를 교체하세요.
+       DNS를 Cloudflare에 프록시(주황 구름)하지 않아도 동작하는 별도 스크립트입니다. -->
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "CF_BEACON_TOKEN_PLACEHOLDER"}'></script>
+
+  <!-- Google AdSense 자동 광고: ca-pub-XXXXXXXXXXXXXXXX 를 AdSense에서 발급받은 실제
+       게시자 ID로 교체하세요. 자동 광고 방식이므로 이 스크립트 한 줄이면 충분하며,
+       광고가 표시될 위치는 AdSense 대시보드의 자동 광고 설정에서 제어합니다. -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-  -->
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,7 +37,7 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "pcap2ai",
-    "url": "https://pcap2ai.vercel.app/",
+    "url": "https://pcap2ai.com/",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Web",
     "description": "Wireshark 패킷 캡처(.pcap/.pcapng)를 ChatGPT, Gemini 등 LLM이 분석할 수 있는 구조화 텍스트로 변환하는 무료 웹 유틸리티",
@@ -61,11 +65,7 @@
 
   <main class="wrap">
 
-    <!-- ▼ Google AdSense: 상단 반응형 배너 슬롯 (승인 후 광고 단위 코드 삽입) -->
-    <div class="ad-slot ad-slot--top" id="ad-top" aria-hidden="true"></div>
-    <!-- ▲ Google AdSense: 상단 배너 슬롯 끝 -->
-
-    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] pt-8">
 
       <!-- ==================== 변환 도구 ==================== -->
       <section aria-labelledby="tool-title" class="min-w-0">
@@ -168,11 +168,7 @@
       </section>
 
       <!-- ==================== 사이드바 ==================== -->
-      <aside class="flex flex-col gap-6 min-w-0" aria-label="보조 정보">
-        <!-- ▼ Google AdSense: 우측 사이드바 슬롯 (승인 후 광고 단위 코드 삽입) -->
-        <div class="ad-slot ad-slot--side" id="ad-side" aria-hidden="true"></div>
-        <!-- ▲ Google AdSense: 사이드바 슬롯 끝 -->
-
+      <aside class="flex flex-col gap-6 min-w-0 lg:mt-14" aria-label="보조 정보">
         <div class="side-card">
           <h3>작동 방식</h3>
           <ol>
@@ -242,10 +238,6 @@
           이유가 여기에 있습니다.
         </p>
       </section>
-
-      <!-- ▼ Google AdSense: 본문 중간 슬롯 (승인 후 광고 단위 코드 삽입) -->
-      <div class="ad-slot ad-slot--article" id="ad-article" aria-hidden="true"></div>
-      <!-- ▲ Google AdSense: 본문 중간 슬롯 끝 -->
 
       <section>
         <h2>요약 모드와 상세 모드, 언제 무엇을 쓰나</h2>
